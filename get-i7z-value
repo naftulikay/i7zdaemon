@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+
+import argparse, os, sys
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('type', choices=('temp','freq'),
+            help="What type of value to get, either a temperature (temp), " +
+                "or a frequency (freq).")
+    parser.add_argument('-c', '--core', type=int, help="The index of the core" +
+            " for which to get a value. This starts at zero and ends at " +
+            "total core count minus one. This only refers to physical cores.",
+            required = True)
+    parser.add_argument('-f', '--format', type=unicode, default=None, 
+            help="The printf format for formatting the value output.")
+    parser.add_argument('-l', '--logfile', type=str, default=None,
+            help="Optional override for the i7zdaemon logfile to use.")
+    parser.add_argument('--in-mhz', action='store_true', 
+            help="Report frequencies in MHz as opposed to GHz, which is the " +
+                "default.")
+    parser.add_argument('--in-fahrenheit', action='store_true',
+            help="Report temperatures in Fahrenheit as opposed to Celcius, " +
+                "which is the default.")
+
+    args = parser.parse_args()
+
+    if args.type == "temp":
+        get_temp_value(args)
+    elif args.type == "freq":
+        get_freq_value(args)
+
+def get_logfile(default, args):
+    logfile = default
+
+    if args.logfile != None:
+        logfile = args.logfile
+
+    if not os.path.isfile(logfile):
+        sys.stderr.write("ERROR: Log file doesn't exist.\n")
+        sys.stderr.write("%s\n" % (logfile,))
+        sys.exit(1)
+    else:
+        return logfile
+
+
+def get_temp_value(args):
+    logfile = get_logfile('/tmp/i7zdaemon/temperature.log', args)
+
+    with open(logfile, 'r') as f:
+        lines = [line.strip() for line in f.readlines()[1:]]
+        
+        if args.core >= len(lines):
+            sys.stderr.write("ERROR: Core %d not found.\n" % (args.core,))
+            sys.exit(1)
+        else:
+            fmt = u"%d\u00B0C" if not args.in_fahrenheit else u"%d\u00B0F"
+            
+            if args.format != None:
+                fmt = args.format
+
+            temp = float(lines[args.core])
+            
+            print fmt % (temp if not args.in_fahrenheit else 
+                    temp * (9.0/5.0) + 32, )
+
+def get_freq_value(args):
+    logfile = get_logfile('/tmp/i7zdaemon/frequency.log', args)
+
+    with open(logfile, 'r') as f:
+        lines = [line.strip() for line in f.readlines()[1:]]
+
+        if args.core >= len(lines):
+            sys.stderr.write("ERROR: Core %d not found\n" % (args.core,))
+            sys.exit(1)
+        else:
+            fmt = u"%.02fGHz" if not args.in_mhz else u"%.02fMHz"
+
+            if args.format != None:
+                fmt = args.format
+            
+            freq = float(lines[args.core])
+
+            print fmt % (freq if args.in_mhz else freq * 0.001,)
+
+if __name__ == "__main__":
+    main()
