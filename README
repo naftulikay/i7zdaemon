@@ -1,9 +1,0 @@
-#i7zdaemon#
-
-A simple utility script for running `i7z` as a daemon on Unix systems.
-
-If you're not aware, `i7z` is an executable which allows users to view CPU 
-temperatures, frequencies, and C states on Intel i3, i5, and i7 processors.
-`i7zdaemon` takes this library and makes it more useful by having `i7z` log out
-temperatures, frequencies, and C states to files on the filesystem, thus making
-it easier to parse these values and use them in scripts.
