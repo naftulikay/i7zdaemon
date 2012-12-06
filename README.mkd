@@ -7,3 +7,10 @@ temperatures, frequencies, and C states on Intel i3, i5, and i7 processors.
 `i7zdaemon` takes this library and makes it more useful by having `i7z` log out
 temperatures, frequencies, and C states to files on the filesystem, thus making
 it easier to parse these values and use them in scripts.
+
+Included is a Python script called `get-i7z-value` which allows the user to 
+request a temperature or frequency from a given core. Frequencies can be 
+reported in GHz or in MHz. Temperatures can be reported in Celcius or in 
+Fahrenheit. All values can be formatted with a `--format` parameter using 
+printf underneath the hood. This script should make it easy to create other
+scripts to monitor temperatures and frequencies.
